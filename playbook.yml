@@ -3,7 +3,7 @@
   hosts: laptop0
   become: yes
   become_method: su
-  become_user: lagumen
+  become_user: ansible
   become_flags: '-s /bin/sh'
   gather_facts: true
 #
