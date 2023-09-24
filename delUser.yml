@@ -1,0 +1,44 @@
+---
+- name: Create user 
+  hosts: laptop1
+  become: yes
+  become_method: su
+  become_user: root
+  become_flags: '-s /bin/sh'
+  gather_facts: false
+#
+#
+  tasks:
+      - include_vars: name_vars.yml
+      - name: Delete a login user
+        user:
+          name: "{{ user }}"
+          password: "{{ password | password_hash('sha512') }}"
+          groups:
+            - wheel
+          state: absent
+          shell: /bin/bash
+
+      - name: Remove Deny root from logging in
+        ansible.builtin.lineinfile:
+          dest: /etc/ssh/sshd_config
+          regexp: '^(#)?PermitRootLogin \w*$'
+          line: 'PermitRootLogin no'
+          state: absent
+
+      - name: Remove {{ user }} to sudoers file
+        ansible.builtin.lineinfile:
+          path: /etc/sudoers
+          regexp: '^{{ user }}'
+          state: absent          
+          validate: 'visudo -cf %s'
+
+      - name: Remove group
+        group:
+          name: "{{ set_group1 }}"
+          state: absent
+
+      - name: Remove User Directory
+        ansible.builtin.file:
+          path: "/home/{{ user }}"
+          state: absent

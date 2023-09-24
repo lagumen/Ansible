@@ -1,0 +1,26 @@
+---
+- name: Create Group and Add User
+  hosts: laptop1
+  vars:
+    superuser: root
+  become: yes
+  become_method: su
+  become_user: "{{ superuser }}"
+  become_flags: '-s /bin/sh'
+  gather_facts: false
+  
+#
+#
+  
+  tasks:
+      - include_vars: name_vars.yml
+      - name: Remove a group
+        group: 
+          name: "{{ set_group0 }}"
+          state: absent
+
+      - name: Remove User to Group
+        user:
+          name: "{{ user }}"
+          groups: "{{ set_group0 }}"
+          append: no

@@ -1,0 +1,39 @@
+---
+- name: Create user 
+  hosts: laptop1
+  become: yes
+  become_method: su
+  become_user: root
+  become_flags: '-s /bin/sh'
+  gather_facts: false
+#
+#
+  tasks:
+      - include_vars: name_vars.yml
+      - name: Create a login user
+        user:
+          name: "{{ user }}"
+          password: "{{ password | password_hash('sha512') }}"
+          groups:
+            - wheel
+          state: present
+          shell: /bin/bash
+
+      - name: Deny root from logging in
+        ansible.builtin.lineinfile:
+          dest: /etc/ssh/sshd_config
+          regexp: '^(#)?PermitRootLogin \w*$'
+          line: 'PermitRootLogin no'
+          state: present
+
+      - name: Add {{ user }} to sudoers file
+        ansible.builtin.lineinfile:
+          path: /etc/sudoers
+          regexp: '^{{ user }}'
+          line: '{{ user }} ALL=(ALL) NOPASSWD: ALL'
+          validate: 'visudo -cf %s'
+
+      - name: Create group
+        group:
+          name: "{{ set_group1 }}"
+          state: present

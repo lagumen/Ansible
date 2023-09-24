@@ -1,0 +1,36 @@
+---
+- name: Probe facts
+  hosts: laptop0
+  become: yes
+  become_method: su
+  become_user: root
+  tasks:
+
+    - name: Get root user info
+      ansible.builtin.getent:
+        database: passwd
+        key: root
+    - ansible.builtin.debug:
+        var: ansible_facts.getent_passwd
+
+    - name: Get all groups
+      ansible.builtin.getent:
+        database: group
+        split: ':'
+    - ansible.builtin.debug:
+        var: ansible_facts.getent_group
+
+    - name: Get all hosts, split by tab
+      ansible.builtin.getent:
+        database: hosts
+    - ansible.builtin.debug:
+        var: ansible_facts.getent_hosts
+
+    - name: Get http service info, no error if missing
+      ansible.builtin.getent:
+        database: services
+        key: http
+        fail_key: False
+    - ansible.builtin.debug:
+        var: ansible_facts.getent_services
+

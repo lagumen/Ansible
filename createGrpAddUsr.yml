@@ -1,0 +1,24 @@
+---
+- name: Create Group and Add User
+  hosts: laptop1
+  become: yes
+  become_method: su
+  become_user: root
+  become_flags: '-s /bin/sh'
+  gather_facts: false
+  
+#
+#
+  
+  tasks:
+      - include_vars: name_vars.yml
+      - name: Add a group
+        group: 
+          name: "{{ set_group0 }}"
+          state: present
+
+      - name: Add User to Group
+        user:
+          name: "{{ user }}"
+          groups: "{{ set_group0 }}"
+          append: yes

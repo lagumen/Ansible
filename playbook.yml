@@ -1,0 +1,17 @@
+---
+- name: Test 
+  hosts: laptop0
+  become: yes
+  become_method: su
+  become_user: lagumen
+  become_flags: '-s /bin/sh'
+  gather_facts: true
+#
+#
+  tasks:
+      - name: Execute Command date
+        command: hostnamectl
+        register: command_output
+
+      - debug:
+          var: command_output.stdout_lines
